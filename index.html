@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ToolNest — free, easy-to-use online tools for everyday tasks.">
+<title>ToolNest — Free Tools. Easy Solutions.</title>
+<style>
+:root{--bg:#f5f8fc;--ink:#14243a;--muted:#64748b;--blue:#2563eb;--line:#e4eaf2;--card:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#10243b;color:#fff;padding:18px 6%;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:800;letter-spacing:-.5px}.logo{width:38px;height:38px;border-radius:12px;background:#2563eb;display:grid;place-items:center;font-size:21px}
+nav a{color:#d9e7f7;text-decoration:none;margin-left:22px;font-size:14px}
+.hero{padding:70px 6% 58px;text-align:center;background:linear-gradient(135deg,#10243b,#173d62);color:#fff}
+.eyebrow{color:#9cc8ff;font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(38px,6vw,62px);line-height:1.05;letter-spacing:-2px;margin:15px 0}
+.hero p{color:#d5e3f2;font-size:18px;margin:0 auto 25px;max-width:620px}
+.search{width:min(560px,100%);padding:15px 18px;border:0;border-radius:13px;font-size:15px;outline:none;box-shadow:0 8px 30px #07182b55}
+main{max-width:1120px;margin:auto;padding:48px 22px 70px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:22px}
+h2{font-size:27px;margin:0;letter-spacing:-.7px}.section-head p{color:var(--muted);margin:6px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:17px}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:22px;text-align:left;cursor:pointer;transition:.18s;box-shadow:0 5px 18px #10243b08}
+.tool:hover{transform:translateY(-3px);border-color:#b8cdf5;box-shadow:0 12px 25px #10243b12}
+.tool .ico{width:47px;height:47px;border-radius:14px;background:#eaf1ff;display:grid;place-items:center;font-size:23px;margin-bottom:15px}
+.tool h3{margin:0 0 7px;font-size:17px}.tool p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+.panel{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:25px;display:none}
+.panel.active{display:block}.panel h2{font-size:22px;margin-bottom:8px}.panel .hint{color:var(--muted);font-size:14px;margin:0 0 18px}
+label{display:block;font-weight:650;font-size:13px;margin:13px 0 7px}
+input,textarea,select{width:100%;padding:12px 13px;border:1px solid #d8e1ed;border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:115px;resize:vertical}
+button{border:0;border-radius:10px;background:var(--blue);color:#fff;padding:11px 17px;font-weight:700;cursor:pointer;margin-top:12px}
+button.secondary{background:#eaf1ff;color:#1746a2;margin-left:7px}
+.result{margin-top:15px;padding:13px 15px;background:#f0f6ff;border-radius:10px;color:#173d62;line-height:1.6;overflow-wrap:anywhere}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+footer{text-align:center;padding:28px;color:#718096;font-size:13px;border-top:1px solid var(--line)}
+.small{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:600px){header{padding:15px 5%}nav a{margin-left:10px;font-size:12px}.hero{padding:55px 5%}.section-head{display:block}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span class="logo">⌘</span>ToolNest</div><nav><a href="#tools">Tools</a><a href="#about">About</a><a href="#privacy">Privacy</a></nav></header>
+<section class="hero"><div class="eyebrow">A home for useful online tools</div><h1>Free Tools. Easy Solutions.</h1><p>Simple, helpful tools for everyday tasks. No complicated setup — just choose a tool and get things done.</p><input class="search" id="search" placeholder="Search a tool..." aria-label="Search tools"></section>
+<main id="tools">
+<div class="section-head"><div><h2>Explore our tools</h2><p>Useful tools, ready when you need them.</p></div></div>
+<div class="grid" id="grid">
+<button class="tool" data-tool="image"><div class="ico">🖼️</div><h3>Image Compressor</h3><p>Reduce image file size right in your browser.</p></button>
+<button class="tool" data-tool="pdf"><div class="ico">📄</div><h3>PDF Tools</h3><p>Quick PDF utilities. More PDF features coming soon.</p></button>
+<button class="tool" data-tool="words"><div class="ico">✍️</div><h3>Word Counter</h3><p>Count words, characters and estimate reading time.</p></button>
+<button class="tool" data-tool="age"><div class="ico">🎂</div><h3>Age Calculator</h3><p>Calculate your age from your date of birth.</p></button>
+<button class="tool" data-tool="unit"><div class="ico">📏</div><h3>Unit Converter</h3><p>Convert common length, weight and temperature units.</p></button>
+<button class="tool" data-tool="qr"><div class="ico">▦</div><h3>QR Code Generator</h3><p>Create a QR code from text or a website link.</p></button>
+</div>
+<section class="panel" id="panel" aria-live="polite"></section>
+<section id="about" style="margin-top:55px;text-align:center"><h2>Welcome to ToolNest</h2><p style="color:var(--muted);max-width:650px;margin:10px auto;line-height:1.7">ToolNest is a home for useful online tools. Our goal is to make everyday digital tasks easier with simple, free and accessible tools.</p></section>
+<section id="privacy" style="margin-top:30px;text-align:center"><h2>Privacy</h2><p style="color:var(--muted);max-width:650px;margin:10px auto;line-height:1.7">ToolNest starter tools run in your browser. Files selected for image and PDF tools are processed on your device by this page and are not intentionally uploaded to a ToolNest server. External libraries may load from their providers.</p></section>
+<section id="contact" style="margin-top:30px;text-align:center"><h2>Contact</h2><p style="color:var(--muted)">Contact details will be added before the public launch.</p></section>
+</main>
+<footer>© <span id="year"></span> ToolNest. Free Tools. Easy Solutions.</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+const panel=document.getElementById('panel');document.getElementById('year').textContent=new Date().getFullYear();
+const views={
+words:`<h2>Word Counter</h2><p class="hint">Type or paste your text below.</p><textarea id="wordsText" placeholder="Start typing..."></textarea><div class="result" id="wordsResult">Words: 0 · Characters: 0 · Reading time: 0 min</div>`,
+age:`<h2>Age Calculator</h2><p class="hint">Choose your date of birth.</p><label>Date of birth</label><input type="date" id="dob"><button id="ageBtn">Calculate age</button><div id="ageResult"></div>`,
+unit:`<h2>Unit Converter</h2><p class="hint">Convert common measurements.</p><div class="row"><div><label>Value</label><input type="number" id="unitValue" value="1"></div><div><label>Category</label><select id="unitType"><option value="length">Length</option><option value="weight">Weight</option><option value="temp">Temperature</option></select></div></div><div class="row"><div><label>From</label><select id="unitFrom"></select></div><div><label>To</label><select id="unitTo"></select></div></div><button id="convertBtn">Convert</button><div id="unitResult"></div>`,
+image:`<h2>Image Compressor</h2><p class="hint">Select an image. Compression happens in your browser.</p><label>Choose image</label><input type="file" id="imgFile" accept="image/*"><label>Output quality</label><input type="range" id="quality" min=".2" max=".95" step=".05" value=".75"><button id="compressBtn">Compress image</button><div id="imgResult"></div>`,
+qr:`<h2>QR Code Generator</h2><p class="hint">Enter text or a website address.</p><input id="qrText" placeholder="https://example.com"><button id="qrBtn">Generate QR code</button><div id="qrResult" class="result" style="display:none;text-align:center"><div id="qrcode" style="display:inline-block;background:white;padding:10px"></div><br><button id="qrDownload">Download QR</button></div>`,
+pdf:`<h2>PDF Tools</h2><p class="hint">Your files are processed in your browser. Choose a tool below.</p>
+<div class="row"><div><label>Merge PDF files</label><input type="file" id="pdfMergeFiles" accept="application/pdf" multiple><button id="pdfMergeBtn">Merge PDFs</button></div>
+<div><label>Extract pages from one PDF</label><input type="file" id="pdfSingle" accept="application/pdf"><label>Pages (example: 1,3-5)</label><input id="pdfPages" placeholder="1,3-5"><button id="pdfExtractBtn">Extract pages</button></div></div><div id="pdfResult"></div><p class="small">Note: PDF compression is not included yet. Do not close this page while a PDF is processing.</p>`
+};
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+function showTool(name){panel.innerHTML=views[name]||'';panel.classList.add('active');panel.scrollIntoView({behavior:'smooth',block:'start'});
+if(name==='words'){const t=document.getElementById('wordsText');t.addEventListener('input',()=>{let s=t.value.trim();let words=s?s.split(/\s+/).length:0;document.getElementById('wordsResult').textContent=`Words: ${words} · Characters: ${t.value.length} · Reading time: ${words?Math.max(1,Math.ceil(words/200)):0} min`;});}
+if(name==='age')document.getElementById('ageBtn').onclick=()=>{let d=new Date(document.getElementById('dob').value),now=new Date();if(!document.getElementById('dob').value||d>now){document.getElementById('ageResult').innerHTML='<div class="result">Please enter a valid date in the past.</div>';return;}let y=now.getFullYear()-d.getFullYear(),m=now.getMonth()-d.getMonth(),day=now.getDate()-d.getDate();if(day<0){m--;day+=new Date(now.getFullYear(),now.getMonth(),0).getDate()}if(m<0){y--;m+=12}document.getElementById('ageResult').innerHTML=`<div class="result"><b>${y} years, ${m} months and ${day} days</b></div>`;};
+if(name==='unit'){const opts={length:['Meters','Kilometers','Centimeters','Miles','Feet','Inches'],weight:['Kilograms','Grams','Pounds','Ounces'],temp:['Celsius','Fahrenheit','Kelvin']};const factors={Meters:1,Kilometers:1000,Centimeters:.01,Miles:1609.344,Feet:.3048,Inches:.0254,Kilograms:1,Grams:.001,Pounds:.45359237,Ounces:.0283495};let type=document.getElementById('unitType'),from=document.getElementById('unitFrom'),to=document.getElementById('unitTo');function fill(){from.innerHTML=to.innerHTML=opts[type.value].map(x=>`<option>${x}</option>`).join('');to.selectedIndex=1}type.onchange=fill;fill();document.getElementById('convertBtn').onclick=()=>{let v=Number(document.getElementById('unitValue').value),a=from.value,b=to.value,r;if(type.value==='temp'){let c=a==='Celsius'?v:a==='Fahrenheit'?(v-32)*5/9:v-273.15;r=b==='Celsius'?c:b==='Fahrenheit'?c*9/5+32:c+273.15}else r=v*factors[a]/factors[b];document.getElementById('unitResult').innerHTML=`<div class="result">${v} ${a} = <b>${Number(r.toFixed(6))} ${b}</b></div>`;};}
+if(name==='image')document.getElementById('compressBtn').onclick=()=>{let f=document.getElementById('imgFile').files[0];if(!f)return alert('Please choose an image first.');let reader=new FileReader();reader.onload=e=>{let im=new Image();im.onload=()=>{let c=document.createElement('canvas');c.width=im.width;c.height=im.height;c.getContext('2d').drawImage(im,0,0);c.toBlob(blob=>{let url=URL.createObjectURL(blob),kb=n=>(n/1024).toFixed(1);document.getElementById('imgResult').innerHTML=`<div class="result">Original: ${kb(f.size)} KB · Compressed: ${kb(blob.size)} KB</div><p><a href="${url}" download="toolnest-compressed.jpg">Download compressed image</a></p>`;},'image/jpeg',Number(document.getElementById('quality').value));};im.src=e.target.result;};reader.readAsDataURL(f);};
+if(name==='pdf'){
+const result=document.getElementById('pdfResult');
+document.getElementById('pdfMergeBtn').onclick=async()=>{try{const files=[...document.getElementById('pdfMergeFiles').files];if(files.length<2)throw Error('Select at least two PDF files.');if(!window.PDFLib)throw Error('PDF library did not load. Check your internet connection and refresh.');const out=await PDFLib.PDFDocument.create();for(const f of files){const src=await PDFLib.PDFDocument.load(await f.arrayBuffer());const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(pg=>out.addPage(pg));}const bytes=await out.save();downloadBlob(new Blob([bytes],{type:'application/pdf'}),'toolnest-merged.pdf');result.innerHTML='<div class="result">Your merged PDF is ready and downloading.</div>';}catch(e){result.innerHTML='<div class="result">'+e.message+'</div>';}};
+document.getElementById('pdfExtractBtn').onclick=async()=>{try{const f=document.getElementById('pdfSingle').files[0];if(!f)throw Error('Choose a PDF file.');if(!window.PDFLib)throw Error('PDF library did not load. Check your internet connection and refresh.');const src=await PDFLib.PDFDocument.load(await f.arrayBuffer());const spec=document.getElementById('pdfPages').value.trim();if(!spec)throw Error('Enter page numbers, such as 1,3-5.');let nums=[];for(const part of spec.split(',')){if(/^\\d+$/.test(part))nums.push(Number(part));else if(/^\\d+-\\d+$/.test(part)){let [a,b]=part.split('-').map(Number);if(b<a)throw Error('Page range must go from low to high.');for(let n=a;n<=b;n++)nums.push(n);}else throw Error('Use a format like 1,3-5.');}if(nums.some(n=>n<1||n>src.getPageCount()))throw Error('A page number is outside this PDF. It has '+src.getPageCount()+' pages.');const out=await PDFLib.PDFDocument.create();const pages=await out.copyPages(src,[...new Set(nums)].map(n=>n-1));pages.forEach(pg=>out.addPage(pg));const bytes=await out.save();downloadBlob(new Blob([bytes],{type:'application/pdf'}),'toolnest-extracted.pdf');result.innerHTML='<div class="result">Your selected pages are ready and downloading.</div>';}catch(e){result.innerHTML='<div class="result">'+e.message+'</div>';}}
+}
+if(name==='qr'){document.getElementById('qrBtn').onclick=()=>{let val=document.getElementById('qrText').value.trim();if(!val)return alert('Enter some text or a URL.');let q=document.getElementById('qrcode');q.innerHTML='';new QRCode(q,{text:val,width:200,height:200});document.getElementById('qrResult').style.display='block';};document.getElementById('qrDownload').onclick=()=>{let q=document.querySelector('#qrcode canvas')||document.querySelector('#qrcode img');let url=q.tagName==='CANVAS'?q.toDataURL('image/png'):q.src;let a=document.createElement('a');a.href=url;a.download='toolnest-qr.png';a.click();};}
+}
+document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>showTool(b.dataset.tool)));
+document.getElementById('search').addEventListener('input',e=>{let q=e.target.value.toLowerCase();document.querySelectorAll('[data-tool]').forEach(b=>b.style.display=b.innerText.toLowerCase().includes(q)?'block':'none');});
+</script>
+</body></html>
