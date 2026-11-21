@@ -47,6 +47,7 @@ footer{text-align:center;padding:28px;color:#718096;font-size:13px;border-top:1p
 <button class="tool" data-tool="image"><div class="ico">🖼️</div><h3>Image Compressor</h3><p>Reduce image file size right in your browser.</p></button>
 <button class="tool" data-tool="resizer"><div class="ico">📐</div><h3>Image Resizer</h3><p>Change image width and height in your browser.</p></button>
 <button class="tool" data-tool="pdf"><div class="ico">📄</div><h3>PDF Merge &amp; Extract</h3><p>Combine PDF files or extract selected pages.</p></button>
+<button class="tool" data-tool="splitter"><div class="ico">✂️</div><h3>PDF Splitter</h3><p>Split one PDF into separate files by page ranges.</p></button>
 <button class="tool" data-tool="words"><div class="ico">✍️</div><h3>Word Counter</h3><p>Count words, characters and estimate reading time.</p></button>
 <button class="tool" data-tool="age"><div class="ico">🎂</div><h3>Age Calculator</h3><p>Calculate your age from your date of birth.</p></button>
 <button class="tool" data-tool="unit"><div class="ico">📏</div><h3>Unit Converter</h3><p>Convert common length, weight and temperature units.</p></button>
@@ -78,7 +79,12 @@ qr:`<h2>QR Code Generator</h2><p class="hint">Enter text or a website address.</
 pdf:`<h2>PDF Merge &amp; Extract</h2><p class="hint">Select at least two PDF files to merge, or choose one PDF to extract pages.</p>
 <div class="row"><div><label>Merge PDF files</label><input type="file" id="pdfMergeFiles" accept="application/pdf" multiple><button id="pdfMergeBtn">Merge PDF Files</button></div>
 <div><label>Extract pages from one PDF</label><input type="file" id="pdfSingle" accept="application/pdf"><label>Pages (example: 1,3-5)</label><input id="pdfPages" placeholder="1,3-5"><button id="pdfExtractBtn">Extract PDF Pages</button></div></div><div id="pdfResult"></div><p class="small">Note: PDF compression is not included yet. Do not close this page while a PDF is processing.</p>`,
-password:`<h2>Password Generator</h2><p class="hint">Create a random password. It is generated in your browser and is not sent anywhere.</p>
+splitter:`<h2>PDF Splitter</h2><p class="hint">Choose one PDF and enter page ranges to create separate PDF files. Example: 1-3, 4-6, 7.</p>
+ <label>Choose PDF file</label><input type="file" id="splitPdfFile" accept="application/pdf">
+ <label>Page ranges (separate parts with commas)</label><input id="splitRanges" placeholder="Example: 1-3, 4-6, 7">
+ <p class="small">Each range becomes a separate PDF file. For example, 1-3, 4-6 creates two files.</p>
+ <button id="splitPdfBtn">Split PDF</button><div id="splitPdfResult"></div>,
+ password:`<h2>Password Generator</h2><p class="hint">Create a random password. It is generated in your browser and is not sent anywhere.</p>
 <label>Password length: <strong id="passLengthLabel">16</strong></label><input type="range" id="passLength" min="8" max="64" value="16">
 <label><input type="checkbox" id="passUpper" checked style="width:auto;margin-right:8px">Include uppercase letters (A–Z)</label>
 <label><input type="checkbox" id="passLower" checked style="width:auto;margin-right:8px">Include lowercase letters (a–z)</label>
@@ -104,6 +110,56 @@ if(name==='resizer'){
 }
 if(name==='pdf'){const result=document.getElementById('pdfResult');document.getElementById('pdfMergeBtn').onclick=async()=>{try{const files=[...document.getElementById('pdfMergeFiles').files];if(files.length<2)throw Error('Select at least two PDF files.');const lib=await ensurePdfLib();const out=await lib.PDFDocument.create();for(const f of files){const src=await lib.PDFDocument.load(await f.arrayBuffer());const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(pg=>out.addPage(pg));}const bytes=await out.save();downloadBlob(new Blob([bytes],{type:'application/pdf'}),'toolnest-merged.pdf');result.innerHTML='<div class="result">Your merged PDF is ready and downloading.</div>';}catch(e){result.innerHTML='<div class="result">'+e.message+'</div>';}};
 document.getElementById('pdfExtractBtn').onclick=async()=>{try{const f=document.getElementById('pdfSingle').files[0];if(!f)throw Error('Choose a PDF file.');const lib=await ensurePdfLib();const src=await lib.PDFDocument.load(await f.arrayBuffer());const spec=document.getElementById('pdfPages').value.trim();if(!spec)throw Error('Enter page numbers, such as 1,3-5.');let nums=[];for(const part of spec.split(',')){if(/^\d+$/.test(part))nums.push(Number(part));else if(/^\d+-\d+$/.test(part)){let [a,b]=part.split('-').map(Number);if(b<a)throw Error('Page range must go from low to high.');for(let n=a;n<=b;n++)nums.push(n);}else throw Error('Use a format like 1,3-5.');}if(nums.some(n=>n<1||n>src.getPageCount()))throw Error('A page number is outside this PDF. It has '+src.getPageCount()+' pages.');const out=await lib.PDFDocument.create();const pages=await out.copyPages(src,[...new Set(nums)].map(n=>n-1));pages.forEach(pg=>out.addPage(pg));const bytes=await out.save();downloadBlob(new Blob([bytes],{type:'application/pdf'}),'toolnest-extracted.pdf');result.innerHTML='<div class="result">Your selected pages are ready and downloading.</div>';}catch(e){result.innerHTML='<div class="result">'+e.message+'</div>';}};}
+if(name==='splitter'){
+ const result=document.getElementById('splitPdfResult');
+ document.getElementById('splitPdfBtn').onclick=async()=>{
+  try{
+   const file=document.getElementById('splitPdfFile').files[0];
+   if(!file)throw Error('Choose a PDF file first.');
+   const spec=document.getElementById('splitRanges').value.trim();
+   if(!spec)throw Error('Enter page ranges, such as 1-3, 4-6.');
+   result.textContent='Splitting PDF...';
+   const lib=await ensurePdfLib();
+   const source=await lib.PDFDocument.load(await file.arrayBuffer());
+   const total=source.getPageCount();
+   const parsed=spec.split(',').map(part=>{
+    const match=part.trim().match(/^(\d+)\s*-\s*(\d+)$/);
+    if(match)return [Number(match[1]),Number(match[2])];
+    if(/^\d+$/.test(part.trim()))return [Number(part.trim()),Number(part.trim())];
+    throw Error('Use page ranges like 1-3, 4-6, 7.');
+   });
+   for(const [start,end] of parsed){
+    if(start<1||end<start||end>total)throw Error('A page range is invalid. This PDF has '+total+' pages.');
+   }
+   result.innerHTML='';
+   for(let i=0;i<parsed.length;i++){
+    const [start,end]=parsed[i];
+    const part=await lib.PDFDocument.create();
+    const indices=Array.from({length:end-start+1},(_,n)=>start+n-1);
+    const pages=await part.copyPages(source,indices);
+    pages.forEach(page=>part.addPage(page));
+    const blob=new Blob([await part.save()],{type:'application/pdf'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download=`${file.name.replace(/\.pdf$/i,'')}-part-${i+1}-pages-${start}-${end}.pdf`;
+    link.textContent=`Download Part ${i+1} (pages ${start}-${end})`;
+    link.style.cssText='display:inline-block;margin:8px 8px 0 0;padding:10px 14px;background:#eaf1ff;color:#1746a2;border-radius:10px;text-decoration:none;font-weight:700';
+    result.appendChild(link);
+   }
+   const note=document.createElement('div');
+   note.className='result';
+   note.textContent=`Done! Created ${parsed.length} separate PDF file(s). Click each download link above.`;
+   result.prepend(note);
+  }catch(error){
+   result.innerHTML='';
+   const message=document.createElement('div');
+   message.className='result';
+   message.textContent=error.message||'Could not split this PDF.';
+   result.appendChild(message);
+  }
+ };
+}
 if(name==='password'){const length=document.getElementById('passLength'),label=document.getElementById('passLengthLabel');length.oninput=()=>label.textContent=length.value;document.getElementById('passGenerate').onclick=()=>{const groups=[];if(document.getElementById('passUpper').checked)groups.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');if(document.getElementById('passLower').checked)groups.push('abcdefghijklmnopqrstuvwxyz');if(document.getElementById('passNumbers').checked)groups.push('0123456789');if(document.getElementById('passSymbols').checked)groups.push('!@#$%^&*()-_=+[]{}?');const result=document.getElementById('passResult');if(!groups.length){result.textContent='Select at least one character type.';return;}const chars=groups.join('');const bytes=new Uint32Array(Number(length.value));if(!window.crypto||!crypto.getRandomValues){result.textContent='Secure password generation is not supported by this browser.';return;}crypto.getRandomValues(bytes);let password=Array.from(bytes,n=>chars[n%chars.length]).join('');if(password.length>=groups.length){const arr=password.split('');groups.forEach((g,i)=>{arr[i]=g[bytes[i]%g.length];});for(let i=arr.length-1;i>0;i--){const j=bytes[i]%(i+1);[arr[i],arr[j]]=[arr[j],arr[i]];}password=arr.join('');}document.getElementById('passOutput').value=password;result.textContent='Password created. Keep it somewhere safe.';};document.getElementById('passCopy').onclick=async()=>{const out=document.getElementById('passOutput');if(!out.value){document.getElementById('passResult').textContent='Generate a password first.';return;}try{await navigator.clipboard.writeText(out.value);document.getElementById('passResult').textContent='Password copied.';}catch(e){out.select();document.execCommand('copy');document.getElementById('passResult').textContent='Password copied.';}};}
 if(name==='qr'){document.getElementById('qrBtn').onclick=()=>{let val=document.getElementById('qrText').value.trim();if(!val)return alert('Enter some text or a URL.');let q=document.getElementById('qrcode');q.innerHTML='';new QRCode(q,{text:val,width:200,height:200});document.getElementById('qrResult').style.display='block';};document.getElementById('qrDownload').onclick=()=>{let q=document.querySelector('#qrcode canvas')||document.querySelector('#qrcode img');if(!q)return;let url=q.tagName==='CANVAS'?q.toDataURL('image/png'):q.src;let a=document.createElement('a');a.href=url;a.download='toolnest-qr.png';a.click();};}
 }
