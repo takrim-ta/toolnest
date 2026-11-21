@@ -45,6 +45,7 @@ footer{text-align:center;padding:28px;color:#718096;font-size:13px;border-top:1p
 <div class="section-head"><div><h2>Explore our tools</h2><p>Useful tools, ready when you need them.</p></div></div>
 <div class="grid" id="grid">
 <button class="tool" data-tool="image"><div class="ico">🖼️</div><h3>Image Compressor</h3><p>Reduce image file size right in your browser.</p></button>
+<button class="tool" data-tool="imagepdf"><div class="ico">🖼️📄</div><h3>Image to PDF Converter</h3><p>Turn JPG and PNG images into a PDF file.</p></button>
 <button class="tool" data-tool="resizer"><div class="ico">📐</div><h3>Image Resizer</h3><p>Change image width and height in your browser.</p></button>
 <button class="tool" data-tool="pdf"><div class="ico">📄</div><h3>PDF Merge &amp; Extract</h3><p>Combine PDF files or extract selected pages.</p></button>
 <button class="tool" data-tool="splitter"><div class="ico">✂️</div><h3>PDF Splitter</h3><p>Split one PDF into separate files by page ranges.</p></button>
@@ -75,6 +76,10 @@ resizer:`<h2>Image Resizer</h2><p class="hint">Choose an image, set its new dime
 <label><input type="checkbox" id="resizeLock" checked style="width:auto;margin-right:8px">Keep aspect ratio</label>
 <div class="row"><div><label>Image format</label><select id="resizeFormat"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></div><div><label>Quality (JPG/WebP)</label><input type="range" id="resizeQuality" min=".2" max="1" step=".05" value=".9"><div class="small" id="resizeQualityLabel">90%</div></div></div>
 <button id="resizeBtn">Resize image</button><div id="resizeResult"></div>`,
+imagepdf:`<h2>Image to PDF Converter</h2><p class="hint">Choose one or more JPG or PNG images. Each image will be added to its own PDF page.</p>
+<label>Choose images</label><input type="file" id="imagePdfFiles" accept="image/jpeg,image/png" multiple>
+<p class="small">You can select multiple images. They will appear in the PDF in the order selected.</p>
+<button id="imagePdfBtn">Convert to PDF</button><div id="imagePdfResult"></div>`,
 qr:`<h2>QR Code Generator</h2><p class="hint">Enter text or a website address.</p><input id="qrText" placeholder="https://example.com"><button id="qrBtn">Generate QR code</button><div id="qrResult" class="result" style="display:none;text-align:center"><div id="qrcode" style="display:inline-block;background:white;padding:10px"></div><br><button id="qrDownload">Download QR</button></div>`,
 pdf:`<h2>PDF Merge &amp; Extract</h2><p class="hint">Select at least two PDF files to merge, or choose one PDF to extract pages.</p>
 <div class="row"><div><label>Merge PDF files</label><input type="file" id="pdfMergeFiles" accept="application/pdf" multiple><button id="pdfMergeBtn">Merge PDF Files</button></div>
@@ -161,6 +166,31 @@ if(name==='splitter'){
  };
 }
 if(name==='password'){const length=document.getElementById('passLength'),label=document.getElementById('passLengthLabel');length.oninput=()=>label.textContent=length.value;document.getElementById('passGenerate').onclick=()=>{const groups=[];if(document.getElementById('passUpper').checked)groups.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');if(document.getElementById('passLower').checked)groups.push('abcdefghijklmnopqrstuvwxyz');if(document.getElementById('passNumbers').checked)groups.push('0123456789');if(document.getElementById('passSymbols').checked)groups.push('!@#$%^&*()-_=+[]{}?');const result=document.getElementById('passResult');if(!groups.length){result.textContent='Select at least one character type.';return;}const chars=groups.join('');const bytes=new Uint32Array(Number(length.value));if(!window.crypto||!crypto.getRandomValues){result.textContent='Secure password generation is not supported by this browser.';return;}crypto.getRandomValues(bytes);let password=Array.from(bytes,n=>chars[n%chars.length]).join('');if(password.length>=groups.length){const arr=password.split('');groups.forEach((g,i)=>{arr[i]=g[bytes[i]%g.length];});for(let i=arr.length-1;i>0;i--){const j=bytes[i]%(i+1);[arr[i],arr[j]]=[arr[j],arr[i]];}password=arr.join('');}document.getElementById('passOutput').value=password;result.textContent='Password created. Keep it somewhere safe.';};document.getElementById('passCopy').onclick=async()=>{const out=document.getElementById('passOutput');if(!out.value){document.getElementById('passResult').textContent='Generate a password first.';return;}try{await navigator.clipboard.writeText(out.value);document.getElementById('passResult').textContent='Password copied.';}catch(e){out.select();document.execCommand('copy');document.getElementById('passResult').textContent='Password copied.';}};}
+if(name==='imagepdf'){
+ const result=document.getElementById('imagePdfResult');
+ document.getElementById('imagePdfBtn').onclick=async()=>{
+  try{
+   const files=[...document.getElementById('imagePdfFiles').files];
+   if(!files.length)throw Error('Choose at least one JPG or PNG image.');
+   result.textContent='Creating PDF...';
+   const lib=await ensurePdfLib();
+   const pdf=await lib.PDFDocument.create();
+   const pageW=595.28,pageH=841.89,margin=28;
+   for(const file of files){
+    if(!['image/jpeg','image/png'].includes(file.type))throw Error('Only JPG and PNG images are supported.');
+    const bytes=await file.arrayBuffer();
+    const embedded=file.type==='image/png'?await pdf.embedPng(bytes):await pdf.embedJpg(bytes);
+    const scale=Math.min((pageW-2*margin)/embedded.width,(pageH-2*margin)/embedded.height);
+    const width=embedded.width*scale,height=embedded.height*scale;
+    const page=pdf.addPage([pageW,pageH]);
+    page.drawImage(embedded,{x:(pageW-width)/2,y:(pageH-height)/2,width,height});
+   }
+   const blob=new Blob([await pdf.save()],{type:'application/pdf'});
+   downloadBlob(blob,'toolnest-images.pdf');
+   result.innerHTML='<div class="result">Done! Your PDF is ready and downloading.</div>';
+  }catch(error){result.innerHTML='<div class="result">'+(error.message||'Could not create the PDF.')+'</div>';}
+ };
+}
 if(name==='qr'){document.getElementById('qrBtn').onclick=()=>{let val=document.getElementById('qrText').value.trim();if(!val)return alert('Enter some text or a URL.');let q=document.getElementById('qrcode');q.innerHTML='';new QRCode(q,{text:val,width:200,height:200});document.getElementById('qrResult').style.display='block';};document.getElementById('qrDownload').onclick=()=>{let q=document.querySelector('#qrcode canvas')||document.querySelector('#qrcode img');if(!q)return;let url=q.tagName==='CANVAS'?q.toDataURL('image/png'):q.src;let a=document.createElement('a');a.href=url;a.download='toolnest-qr.png';a.click();};}
 }
 document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>showTool(b.dataset.tool)));
