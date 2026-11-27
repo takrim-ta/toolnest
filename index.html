@@ -259,5 +259,11 @@ if(name==='qr'){document.getElementById('qrBtn').onclick=()=>{let val=document.g
 }
 document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>showTool(b.dataset.tool)));
 document.getElementById('search').addEventListener('input',e=>{let q=e.target.value.toLowerCase();document.querySelectorAll('[data-tool]').forEach(b=>b.style.display=b.innerText.toLowerCase().includes(q)?'block':'none');});
-</script>
+</script><footer style="text-align:center; padding:25px; margin-top:30px;">
+  <a href="about.html">About Us</a> |
+  <a href="contact.html">Contact Us</a> |
+  <a href="privacy.html">Privacy Policy</a> |
+  <a href="terms.html">Terms & Conditions</a>
+  <p>© 2026 ToolNest. All rights reserved.</p>
+</footer>
 </body></html>
